@@ -1,0 +1,77 @@
+import AccountService from "../src/AccountService";
+
+test("Deve criar um passageiro", async function () {
+    const input = {
+        name: "John Doe",
+        email: `john.doe${Math.random()}@gmail.com`,
+        cpf: "04765351076",
+        isPassenger: true
+    }
+    const accountService = new AccountService();
+    const output = await accountService.signup(input);
+    const account = await accountService.getAccount(output.accountId);
+    expect(account.account_id).toBeDefined();
+    expect(account.name).toBe(input.name);
+    expect(account.email).toBe(input.email);
+    expect(account.cpf).toBe(input.cpf);
+})
+
+test("Não deve criar um passageiro com cpf inválido", async function () {
+    const input = {
+        name: "John Doe",
+        email: `john.doe${Math.random()}@gmail.com`,
+        cpf: "04765351000",
+        isPassenger: true
+    }
+    const accountService = new AccountService();
+    await expect(() => accountService.signup(input)).rejects.toThrow(new Error("Invalid cpf"));
+})
+
+test("Não deve criar um passageiro com email inválido", async function () {
+    const input = {
+        name: "John Doe",
+        email: `john.doe${Math.random()}@`,
+        cpf: "04765351076",
+        isPassenger: true
+    }
+    const accountService = new AccountService();
+    await expect(() => accountService.signup(input)).rejects.toThrow(new Error("Invalid email"));
+})
+
+test("Não deve criar um passageiro com conta existente", async function () {
+    const input = {
+        name: "John Doe",
+        email: `john.doe${Math.random()}@gmail.com`,
+        cpf: "04765351076",
+        isPassenger: true
+    }
+    const accountService = new AccountService();
+    await accountService.signup(input);
+    await expect(() => accountService.signup(input)).rejects.toThrow(new Error("Account already exists"));
+})
+
+
+test("Deve criar um motorista", async function () {
+    const input = {
+        name: "John Doe",
+        email: `john.doe${Math.random()}@gmail.com`,
+        cpf: "04765351076",
+        isDriver: true,
+        carPlate: "AAA9999"
+    }
+    const accountService = new AccountService();
+    const output = await accountService.signup(input);
+    expect(output.accountId).toBeDefined();
+})
+
+test("Não deve criar um motorista com placa do carro inválida", async function () {
+    const input = {
+        name: "John Doe",
+        email: `john.doe${Math.random()}@gmail.com`,
+        cpf: "04765351076",
+        isDriver: true,
+        carPlate: "AAA999"
+    }
+    const accountService = new AccountService();
+    await expect(() => accountService.signup(input)).rejects.toThrow(new Error("Invalid plate"));
+})
