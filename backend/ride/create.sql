@@ -1,8 +1,8 @@
-DROP SCHEMA ridedb cascade;
+DROP SCHEMA cccat13 cascade;
 
-CREATE SCHEMA ridedb;
+CREATE SCHEMA cccat13;
 
-CREATE TABLE ridedb.account (
+CREATE TABLE cccat13.account (
     account_id uuid,
     name text,
     email text, 
