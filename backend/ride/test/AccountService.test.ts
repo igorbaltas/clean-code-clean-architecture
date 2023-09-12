@@ -38,6 +38,18 @@ test("Não deve criar um passageiro com email inválido", async function () {
     await expect(() => accountService.signup(input)).rejects.toThrow(new Error("Invalid email"));
 })
 
+test("Não deve criar um passageiro com nome inválido", async function () {
+    const input = {
+        name: "",
+        email: `john.doe${Math.random()}@`,
+        cpf: "04765351076",
+        isPassenger: true
+    }
+    const accountService = new AccountService();
+    await expect(() => accountService.signup(input)).rejects.toThrow(new Error("Invalid name"));
+})
+
+
 test("Não deve criar um passageiro com conta existente", async function () {
     const input = {
         name: "John Doe",
