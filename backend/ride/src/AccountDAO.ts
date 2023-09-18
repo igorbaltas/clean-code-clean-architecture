@@ -1,6 +1,7 @@
 import pgp from 'pg-promise';
+import IAccountDAO from './IAccountDAO';
 
-export default class AccountDAO {
+export default class AccountDAO implements IAccountDAO {
     
     constructor() {
     }

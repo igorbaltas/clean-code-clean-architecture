@@ -1,0 +1,6 @@
+{
+  "dependencies": {
+    "@types/sinon": "^10.0.16",
+    "sinon": "^16.0.0"
+  }
+}
