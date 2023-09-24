@@ -32,4 +32,11 @@ export default class RideDAO implements IRideDAO {
         return ridesData;
     }
 
+    async getActiveRidesByDriverId(driverId: string): Promise<any> {
+        const connection = pgp()("postgres://postgres:1234567@localhost:5432/app");
+        const ridesData = await connection.query("select * from cccat13.ride where driver_id = $1 and status in ('accepted', 'in_progress')", [driverId])
+        await connection.$pool.end();
+        return ridesData;
+    }
+
 }

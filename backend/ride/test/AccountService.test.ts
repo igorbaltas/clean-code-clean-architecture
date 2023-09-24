@@ -159,7 +159,7 @@ test("Deve criar um passageiro com mock", async function () {
     mock.restore();
 })
 
-test.only("Deve criar um passageiro com fake", async function () {
+test("Deve criar um passageiro com fake", async function () {
     const accountDAO = new AccountDAOMemory();
     const input: any = {
         name: "John Doe",
