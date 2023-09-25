@@ -3,6 +3,7 @@ import AccountService from "../src/AccountService";
 import AccountDAO from "../src/AccountDAO";
 import MailerGateway from "../src/MailerGateway";
 import AccountDAOMemory from "../src/AccountDAOMemory";
+import Account from "../src/Account";
 
 test("Deve criar um passageiro", async function () {
     const input: any = {
@@ -14,10 +15,10 @@ test("Deve criar um passageiro", async function () {
     const accountService = new AccountService();
     const output = await accountService.signup(input);
     const account = await accountService.getAccount(output.accountId);
-    expect(account.account_id).toBeDefined();
-    expect(account.name).toBe(input.name);
-    expect(account.email).toBe(input.email);
-    expect(account.cpf).toBe(input.cpf);
+    expect(account?.accountId).toBeDefined();
+    expect(account?.name).toBe(input.name);
+    expect(account?.email).toBe(input.email);
+    expect(account?.cpf).toBe(input.cpf);
 })
 
 test("Não deve criar um passageiro com cpf inválido", async function () {
@@ -104,12 +105,12 @@ test("Deve criar um passageiro com stub", async function () {
     const accountService = new AccountService();
     const output = await accountService.signup(input);
     input.account_id = output.accountId;
-    const stubGetById = sinon.stub(AccountDAO.prototype, "getById").resolves(input);
+    const stubGetById = sinon.stub(AccountDAO.prototype, "getById").resolves(Account.create(input.name, input.email, input.cpf, input.isPassenger, false, ""));
     const account = await accountService.getAccount(output.accountId);
-    expect(account.account_id).toBeDefined();
-    expect(account.name).toBe(input.name);
-    expect(account.email).toBe(input.email);
-    expect(account.cpf).toBe(input.cpf);
+    expect(account?.accountId).toBeDefined();
+    expect(account?.name).toBe(input.name);
+    expect(account?.email).toBe(input.email);
+    expect(account?.cpf).toBe(input.cpf);
     stubSave.restore();
     stubGetByEmail.restore();
     stubGetById.restore();
@@ -170,8 +171,8 @@ test("Deve criar um passageiro com fake", async function () {
     const accountService = new AccountService(accountDAO);
     const output = await accountService.signup(input);
     const account = await accountService.getAccount(output.accountId);
-    expect(account.account_id).toBeDefined();
-    expect(account.name).toBe(input.name);
-    expect(account.email).toBe(input.email);
-    expect(account.cpf).toBe(input.cpf);
+    expect(account?.accountId).toBeDefined();
+    expect(account?.name).toBe(input.name);
+    expect(account?.email).toBe(input.email);
+    expect(account?.cpf).toBe(input.cpf);
 })
