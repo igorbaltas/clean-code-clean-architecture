@@ -183,3 +183,16 @@ test("Deve criar um passageiro com fake", async function () {
     expect(account?.email).toBe(input.email);
     expect(account?.cpf).toBe(input.cpf);
 })
+
+test("Não deve criar um passageiro com conta existente usando fake", async function () {
+    const accountDAO = new AccountDAOMemory();
+    const input: any = {
+        name: "John Doe",
+        email: `john.doe${Math.random()}@gmail.com`,
+        cpf: "04765351076",
+        isPassenger: true
+    }
+    const signup = new Signup(accountDAO);
+    await signup.execute(input);
+    await expect(() => signup.execute(input)).rejects.toThrow(new Error("Account already exists"));
+})
