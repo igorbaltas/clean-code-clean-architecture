@@ -33,6 +33,11 @@ export default class Ride {
         this.status = "accepted";
     }
 
+    start() {
+        if (this.status !== "accepted") throw new Error("The ride is not accepted")
+        this.status = "in_progress";
+    }
+
     getStatus() {
         return this.status;
     }

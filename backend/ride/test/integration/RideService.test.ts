@@ -1,18 +1,20 @@
-import AcceptRide from "../src/AcceptRide";
-import AccountDAO from "../src/AccountDAO";
-import IConnection from "../src/IConnection";
-import GetRide from "../src/GetRide";
-import IAccountDAO from "../src/IAccountDAO";
-import IRideDAO from "../src/IRideDAO";
-import PgPromiseAdapter from "../src/PgPromiseAdapter";
-import RequestRide from "../src/RequestRide";
-import RideDAO from "../src/RideDAO";
-import Signup from "../src/Signup";
+import AcceptRide from "../../src/application/usecase/AcceptRide";
+import AccountDAO from "../../src/infra/repository/AccountDAO";
+import IConnection from "../../src/infra/database/IConnection";
+import GetRide from "../../src/application/usecase/GetRide";
+import IAccountDAO from "../../src/application/repository/IAccountDAO";
+import IRideDAO from "../../src/application/repository/IRideDAO";
+import PgPromiseAdapter from "../../src/infra/database/PgPromiseAdapter";
+import RequestRide from "../../src/application/usecase/RequestRide";
+import RideDAO from "../../src/infra/repository/RideDAO";
+import Signup from "../../src/application/usecase/Signup";
+import StartRide from "../../src/application/usecase/StartRide";
 
 let signup: Signup;
 let requestRide: RequestRide;
 let acceptRide: AcceptRide;
 let getRide: GetRide;
+let startRide: StartRide;
 let connection: IConnection;
 let rideDAO: IRideDAO;
 let accountDAO: IAccountDAO;
@@ -25,6 +27,7 @@ beforeEach(function() {
     requestRide = new RequestRide(rideDAO, accountDAO);
     acceptRide = new AcceptRide(rideDAO, accountDAO);
     getRide = new GetRide(rideDAO);
+    startRide = new StartRide(rideDAO);
 });
 
 test("Deve solicitar uma corrida e receber rideId", async function() {
@@ -292,6 +295,48 @@ test("Não deve aceitar uma corrida se o motorista já tiver outra corrida em an
         driverId: outputSignupDriver.accountId
     }
     await expect(() =>  acceptRide.execute(inputAcceptRide2)).rejects.toThrow(new Error("Driver is already in another ride"));
+})
+
+test("Deve solicitar, aceitar e iniciar uma corrida", async function() {
+    const inputSignupPassenger: any = {
+        name: "John Doe",
+        email: `john.doe${Math.random()}@gmail.com`,
+        cpf: "04765351076",
+        isPassenger: true
+    }
+    const outputSignupPassenger = await signup.execute(inputSignupPassenger);
+    const inputRequestRide = {
+        passengerId: outputSignupPassenger.accountId,
+        from: {
+            lat: -27.584905257808835,
+            long: -48.545022195325124
+        },
+        to: {
+            lat: -27.496887588317275,
+            long: -48.522234807851476
+        }
+    }
+    const outputRequestRide = await requestRide.execute(inputRequestRide);
+    const inputSignupDriver: any = {
+        name: "John Doe",
+        email: `john.doe${Math.random()}@gmail.com`,
+        cpf: "04765351076",
+        carPlate: "AAA9999",
+        isDriver: true
+    }
+    const outputSignupDriver = await signup.execute(inputSignupDriver);
+    const inputAcceptRide = {
+        rideId: outputRequestRide.rideId,
+        driverId: outputSignupDriver.accountId
+    }
+    await acceptRide.execute(inputAcceptRide);
+    const inputStartRide = {
+        rideId: outputRequestRide.rideId,
+    }
+    await startRide.execute(inputStartRide);
+    const outputGetRide = await getRide.execute(outputRequestRide.rideId);
+    expect(outputGetRide.getStatus()).toBe("in_progress");
+    expect(outputGetRide.driverId).toBe(outputSignupDriver.accountId);
 })
 
 afterEach(async function(){

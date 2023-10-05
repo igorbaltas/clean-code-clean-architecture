@@ -1,5 +1,5 @@
-import Account from "./Account";
-import IAccountDAO from "./IAccountDAO";
+import Account from "../../domain/Account";
+import IAccountDAO from "../../application/repository/IAccountDAO";
 
 export default class AccountDAOMemory implements IAccountDAO {
     accounts: any = [];

@@ -1,6 +1,6 @@
-import IRideDAO from "./IRideDAO";
-import IAccountDAO from "./IAccountDAO";
-import Ride from "./Ride";
+import IRideDAO from "../repository/IRideDAO";
+import IAccountDAO from "../repository/IAccountDAO";
+import Ride from "../../domain/Ride";
 
 export default class RequestRide {
 

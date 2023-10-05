@@ -1,5 +1,5 @@
-import AccountDAO from "./AccountDAO";
-import IAccountDAO from "./IAccountDAO";
+import AccountDAO from "../../infra/repository/AccountDAO";
+import IAccountDAO from "../repository/IAccountDAO";
 
 export default class GetAccount {
 

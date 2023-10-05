@@ -1,4 +1,4 @@
-import IRideDAO from "./IRideDAO";
+import IRideDAO from "../repository/IRideDAO";
 
 export default class GetRide {
 

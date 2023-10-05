@@ -1,7 +1,7 @@
-import AccountDAO from "./AccountDAO";
-import MailerGateway from "./MailerGateway";
-import IAccountDAO from "./IAccountDAO";
-import Account from "./Account";
+import AccountDAO from "../../infra/repository/AccountDAO";
+import MailerGateway from "../gateway/MailerGateway";
+import IAccountDAO from "../repository/IAccountDAO";
+import Account from "../../domain/Account";
 
 export default class Signup {
 

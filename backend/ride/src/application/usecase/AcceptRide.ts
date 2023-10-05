@@ -1,5 +1,5 @@
-import IRideDAO from "./IRideDAO";
-import IAccountDAO from "./IAccountDAO";
+import IRideDAO from "../repository/IRideDAO";
+import IAccountDAO from "../repository/IAccountDAO";
 
 export default class AcceptRide {
 

@@ -1,6 +1,6 @@
-import IRideDAO from './IRideDAO';
-import Ride from './Ride';
-import IConnection from './IConnection';
+import IRideDAO from '../../application/repository/IRideDAO';
+import Ride from '../../domain/Ride';
+import IConnection from '../database/IConnection';
 
 export default class RideDAO implements IRideDAO {
     

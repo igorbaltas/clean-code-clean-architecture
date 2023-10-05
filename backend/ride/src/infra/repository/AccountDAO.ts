@@ -1,6 +1,6 @@
-import IAccountDAO from './IAccountDAO';
-import Account from './Account';
-import IConnection from './IConnection';
+import IAccountDAO from '../../application/repository/IAccountDAO';
+import Account from '../../domain/Account';
+import IConnection from '../database/IConnection';
 
 export default class AccountDAO implements IAccountDAO {
     

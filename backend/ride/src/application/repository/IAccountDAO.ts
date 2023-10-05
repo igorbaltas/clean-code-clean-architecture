@@ -1,4 +1,4 @@
-import Account from "./Account";
+import Account from "../../domain/Account";
 
 export default interface IAccountDAO {
     save(account: Account): Promise<void>;

@@ -1,13 +1,13 @@
 import sinon from "sinon";
-import AccountDAO from "../src/AccountDAO";
-import MailerGateway from "../src/MailerGateway";
-import AccountDAOMemory from "../src/AccountDAOMemory";
-import Account from "../src/Account";
-import Signup from "../src/Signup";
-import GetAccount from "../src/GetAccount";
-import IConnection from "../src/IConnection";
-import PgPromiseAdapter from "../src/PgPromiseAdapter";
-import IAccountDAO from "../src/IAccountDAO";
+import AccountDAO from "../../src/infra/repository/AccountDAO";
+import MailerGateway from "../../src/application/gateway/MailerGateway";
+import AccountDAOMemory from "../../src/infra/repository/AccountDAOMemory";
+import Account from "../../src/domain/Account";
+import Signup from "../../src/application/usecase/Signup";
+import GetAccount from "../../src/application/usecase/GetAccount";
+import IConnection from "../../src/infra/database/IConnection";
+import PgPromiseAdapter from "../../src/infra/database/PgPromiseAdapter";
+import IAccountDAO from "../../src/application/repository/IAccountDAO";
 
 let signup: Signup;
 let getAccount: GetAccount;
