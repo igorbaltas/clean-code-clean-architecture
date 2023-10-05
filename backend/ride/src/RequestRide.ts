@@ -1,14 +1,12 @@
 import IRideDAO from "./IRideDAO";
-import RideDAO from "./RideDAO";
-import AccountDAO from "./AccountDAO";
 import IAccountDAO from "./IAccountDAO";
 import Ride from "./Ride";
 
 export default class RequestRide {
 
     constructor(
-        readonly rideDAO: IRideDAO = new RideDAO(),
-        readonly accountDAO: IAccountDAO = new AccountDAO()) {
+        readonly rideDAO: IRideDAO,
+        readonly accountDAO: IAccountDAO) {
     }
 
     async execute(input: Input) {

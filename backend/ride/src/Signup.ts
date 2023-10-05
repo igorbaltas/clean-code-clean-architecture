@@ -7,7 +7,7 @@ export default class Signup {
 
 	mailerGateway: MailerGateway;
 
-	constructor (readonly accountDAO: IAccountDAO = new AccountDAO()) {
+	constructor (readonly accountDAO: IAccountDAO) {
 		this.mailerGateway = new MailerGateway();
 	}
 

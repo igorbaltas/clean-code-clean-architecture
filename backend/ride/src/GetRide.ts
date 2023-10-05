@@ -1,11 +1,8 @@
 import IRideDAO from "./IRideDAO";
-import RideDAO from "./RideDAO";
-import AccountDAO from "./AccountDAO";
-import IAccountDAO from "./IAccountDAO";
 
 export default class GetRide {
 
-    constructor(readonly rideDAO: IRideDAO = new RideDAO()) 
+    constructor(readonly rideDAO: IRideDAO) 
     {}
 
     async execute(rideId: string){

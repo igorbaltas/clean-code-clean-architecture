@@ -1,8 +1,31 @@
 import AcceptRide from "../src/AcceptRide";
+import AccountDAO from "../src/AccountDAO";
+import IConnection from "../src/IConnection";
 import GetRide from "../src/GetRide";
+import IAccountDAO from "../src/IAccountDAO";
+import IRideDAO from "../src/IRideDAO";
+import PgPromiseAdapter from "../src/PgPromiseAdapter";
 import RequestRide from "../src/RequestRide";
+import RideDAO from "../src/RideDAO";
 import Signup from "../src/Signup";
 
+let signup: Signup;
+let requestRide: RequestRide;
+let acceptRide: AcceptRide;
+let getRide: GetRide;
+let connection: IConnection;
+let rideDAO: IRideDAO;
+let accountDAO: IAccountDAO;
+
+beforeEach(function() {
+    connection = new PgPromiseAdapter();
+    rideDAO = new RideDAO(connection);
+    accountDAO = new AccountDAO(connection);
+    signup = new Signup(accountDAO);
+    requestRide = new RequestRide(rideDAO, accountDAO);
+    acceptRide = new AcceptRide(rideDAO, accountDAO);
+    getRide = new GetRide(rideDAO);
+});
 
 test("Deve solicitar uma corrida e receber rideId", async function() {
     const inputSignup: any = {
@@ -11,7 +34,6 @@ test("Deve solicitar uma corrida e receber rideId", async function() {
         cpf: "04765351076",
         isPassenger: true
     }
-    const signup = new Signup();
     const outputSignup = await signup.execute(inputSignup);
     const inputRequestRide = {
         passengerId: outputSignup.accountId,
@@ -24,7 +46,6 @@ test("Deve solicitar uma corrida e receber rideId", async function() {
             long: -48.522234807851476
         }
     }
-    const requestRide = new RequestRide();
     const outputRequestRide = await requestRide.execute(inputRequestRide);
     expect(outputRequestRide.rideId).toBeDefined();
 })
@@ -36,7 +57,6 @@ test("Deve solicitar e consultar uma corrida", async function() {
         cpf: "04765351076",
         isPassenger: true
     }
-    const signup = new Signup();
     const outputSignup = await signup.execute(inputSignup);
     const inputRequestRide = {
         passengerId: outputSignup.accountId,
@@ -49,8 +69,6 @@ test("Deve solicitar e consultar uma corrida", async function() {
             long: -48.522234807851476
         }
     }
-    const requestRide = new RequestRide();
-    const getRide = new GetRide();
     const outputRequestRide = await requestRide.execute(inputRequestRide);
     const outputGetRide = await getRide.execute(outputRequestRide.rideId);
     expect(outputGetRide.getStatus()).toBe("requested");
@@ -63,7 +81,6 @@ test("Deve solicitar e consultar uma corrida", async function() {
 })
 
 test("Deve solicitar e aceitar uma corrida", async function() {
-    const signup = new Signup();
     const inputSignupPassenger: any = {
         name: "John Doe",
         email: `john.doe${Math.random()}@gmail.com`,
@@ -82,7 +99,6 @@ test("Deve solicitar e aceitar uma corrida", async function() {
             long: -48.522234807851476
         }
     }
-    const requestRide = new RequestRide();
     const outputRequestRide = await requestRide.execute(inputRequestRide);
     const inputSignupDriver: any = {
         name: "John Doe",
@@ -96,9 +112,7 @@ test("Deve solicitar e aceitar uma corrida", async function() {
         rideId: outputRequestRide.rideId,
         driverId: outputSignupDriver.accountId
     }
-    const acceptRide = new AcceptRide();
     await acceptRide.execute(inputAcceptRide);
-    const getRide = new GetRide();
     const outputGetRide = await getRide.execute(outputRequestRide.rideId);
     expect(outputGetRide.getStatus()).toBe("accepted");
     expect(outputGetRide.driverId).toBe(outputSignupDriver.accountId);
@@ -112,7 +126,6 @@ test("Caso uma corrida seja solicitada por uma conta que não seja de passageiro
         carPlate: "AAA9999",
         isDriver: true
     }
-    const signup = new Signup();
     const outputSignup = await signup.execute(inputSignup);
     const inputRequestRide = {
         passengerId: outputSignup.accountId,
@@ -125,7 +138,6 @@ test("Caso uma corrida seja solicitada por uma conta que não seja de passageiro
             long: -48.522234807851476
         }
     }
-    const requestRide = new RequestRide();
     await expect(() => requestRide.execute(inputRequestRide)).rejects.toThrow(new Error("Account is not from a passenger"));
 })
 
@@ -136,7 +148,6 @@ test("Caso uma corrida seja solicitada por um passageiro e ele ja tenha outra co
         cpf: "04765351076",
         isPassenger: true
     }
-    const signup = new Signup();
     const outputSignup = await signup.execute(inputSignup);
     const inputRequestRide = {
         passengerId: outputSignup.accountId,
@@ -149,13 +160,11 @@ test("Caso uma corrida seja solicitada por um passageiro e ele ja tenha outra co
             long: -48.522234807851476
         }
     }
-    const requestRide = new RequestRide();
     await requestRide.execute(inputRequestRide);
     await expect(() => requestRide.execute(inputRequestRide)).rejects.toThrow(new Error("This passenger already has an active ride"));
 })
 
 test("Não deve aceitar uma corrida se account não for driver", async function() {
-    const signup = new Signup();
     const inputSignupPassenger: any = {
         name: "John Doe",
         email: `john.doe${Math.random()}@gmail.com`,
@@ -174,7 +183,6 @@ test("Não deve aceitar uma corrida se account não for driver", async function(
             long: -48.522234807851476
         }
     }
-    const requestRide = new RequestRide();
     const outputRequestRide = await requestRide.execute(inputRequestRide);
     const inputSignupDriver: any = {
         name: "John Doe",
@@ -188,12 +196,10 @@ test("Não deve aceitar uma corrida se account não for driver", async function(
         rideId: outputRequestRide.rideId,
         driverId: outputSignupDriver.accountId
     }
-    const acceptRide = new AcceptRide();
     await expect(() =>  acceptRide.execute(inputAcceptRide)).rejects.toThrow(new Error("Account is not from a driver"));
 })
 
 test("Não deve aceitar uma corrida se status não for requested", async function() {
-    const signup = new Signup();
     const inputSignupPassenger: any = {
         name: "John Doe",
         email: `john.doe${Math.random()}@gmail.com`,
@@ -212,7 +218,6 @@ test("Não deve aceitar uma corrida se status não for requested", async functio
             long: -48.522234807851476
         }
     }
-    const requestRide = new RequestRide();
     const outputRequestRide = await requestRide.execute(inputRequestRide);
     const inputSignupDriver: any = {
         name: "John Doe",
@@ -226,13 +231,11 @@ test("Não deve aceitar uma corrida se status não for requested", async functio
         rideId: outputRequestRide.rideId,
         driverId: outputSignupDriver.accountId
     }
-    const acceptRide = new AcceptRide();
     await acceptRide.execute(inputAcceptRide);
     await expect(() =>  acceptRide.execute(inputAcceptRide)).rejects.toThrow(new Error("The ride is not requested"));
 })
 
 test("Não deve aceitar uma corrida se o motorista já tiver outra corrida em andamento", async function() {
-    const signup = new Signup();
     const inputSignupPassenger1: any = {
         name: "John Doe",
         email: `john.doe${Math.random()}@gmail.com`,
@@ -269,7 +272,6 @@ test("Não deve aceitar uma corrida se o motorista já tiver outra corrida em an
             long: -48.522234807851476
         }
     }
-    const requestRide = new RequestRide();
     const outputRequestRide1 = await requestRide.execute(inputRequestRide1);
     const outputRequestRide2 = await requestRide.execute(inputRequestRide2);
     const inputSignupDriver: any = {
@@ -284,11 +286,14 @@ test("Não deve aceitar uma corrida se o motorista já tiver outra corrida em an
         rideId: outputRequestRide1.rideId,
         driverId: outputSignupDriver.accountId
     }
-    const acceptRide = new AcceptRide();
     await acceptRide.execute(inputAcceptRide1);
     const inputAcceptRide2 = {
         rideId: outputRequestRide2.rideId,
         driverId: outputSignupDriver.accountId
     }
     await expect(() =>  acceptRide.execute(inputAcceptRide2)).rejects.toThrow(new Error("Driver is already in another ride"));
+})
+
+afterEach(async function(){
+    await connection.close();
 })

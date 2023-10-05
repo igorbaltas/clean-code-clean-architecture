@@ -5,6 +5,21 @@ import AccountDAOMemory from "../src/AccountDAOMemory";
 import Account from "../src/Account";
 import Signup from "../src/Signup";
 import GetAccount from "../src/GetAccount";
+import IConnection from "../src/IConnection";
+import PgPromiseAdapter from "../src/PgPromiseAdapter";
+import IAccountDAO from "../src/IAccountDAO";
+
+let signup: Signup;
+let getAccount: GetAccount;
+let accountDAO: IAccountDAO;
+let connection: IConnection;
+
+beforeEach(function() {
+    connection = new PgPromiseAdapter();
+    accountDAO = new AccountDAO(connection);
+    signup = new Signup(accountDAO);
+    getAccount = new GetAccount(accountDAO);
+})
 
 test("Deve criar um passageiro", async function () {
     const input: any = {
@@ -14,8 +29,6 @@ test("Deve criar um passageiro", async function () {
         isPassenger: true
     }
     
-    const signup = new Signup();
-    const getAccount = new GetAccount();
     const output = await signup.execute(input);
     const account = await getAccount.execute(output.accountId);
     expect(account?.accountId).toBeDefined();
@@ -25,91 +38,94 @@ test("Deve criar um passageiro", async function () {
 })
 
 test("Não deve criar um passageiro com cpf inválido", async function () {
-    const input: any = {
+    const input = {
         name: "John Doe",
         email: `john.doe${Math.random()}@gmail.com`,
         cpf: "04765351000",
-        isPassenger: true
+        isPassenger: true,
+        isDriver: false,
+        carPlate: ""
     }
-    const signup = new Signup();
     await expect(() => signup.execute(input)).rejects.toThrow(new Error("Invalid cpf"));
 })
 
 test("Não deve criar um passageiro com email inválido", async function () {
-    const input: any = {
+    const input = {
         name: "John Doe",
         email: `john.doe${Math.random()}@`,
         cpf: "04765351076",
-        isPassenger: true
+        isPassenger: true,
+        isDriver: false,
+        carPlate: ""
     }
-    const signup = new Signup();
     await expect(() => signup.execute(input)).rejects.toThrow(new Error("Invalid email"));
 })
 
 test("Não deve criar um passageiro com nome inválido", async function () {
-    const input: any = {
+    const input = {
         name: "",
         email: `john.doe${Math.random()}@`,
         cpf: "04765351076",
-        isPassenger: true
+        isPassenger: true,
+        isDriver: false,
+        carPlate: ""
     }
-    const signup = new Signup();
     await expect(() => signup.execute(input)).rejects.toThrow(new Error("Invalid name"));
 })
 
 
 test("Não deve criar um passageiro com conta existente", async function () {
-    const input: any = {
+    const input = {
         name: "John Doe",
         email: `john.doe${Math.random()}@gmail.com`,
         cpf: "04765351076",
-        isPassenger: true
+        isPassenger: true,
+        isDriver: false,
+        carPlate: ""
     }
-    const signup = new Signup();
     await signup.execute(input);
     await expect(() => signup.execute(input)).rejects.toThrow(new Error("Account already exists"));
 })
 
 
 test("Deve criar um motorista", async function () {
-    const input: any = {
+    const input = {
         name: "John Doe",
         email: `john.doe${Math.random()}@gmail.com`,
         cpf: "04765351076",
         isDriver: true,
-        carPlate: "AAA9999"
+        carPlate: "AAA9999",
+        isPassenger: false
     }
-    const signup = new Signup();
     const output = await signup.execute(input);
     expect(output.accountId).toBeDefined();
 })
 
 test("Não deve criar um motorista com placa do carro inválida", async function () {
-    const input: any = {
+    const input = {
         name: "John Doe",
         email: `john.doe${Math.random()}@gmail.com`,
         cpf: "04765351076",
         isDriver: true,
-        carPlate: "AAA999"
+        carPlate: "AAA999",
+        isPassenger: false
     }
-    const signup = new Signup();
     await expect(() => signup.execute(input)).rejects.toThrow(new Error("Invalid plate"));
 })
 
 test("Deve criar um passageiro com stub", async function () {
-    const input: any = {
+    const input = {
         name: "John Doe",
         email: `john.doe${Math.random()}@gmail.com`,
         cpf: "04765351076",
-        isPassenger: true
+        isPassenger: true,
+        isDriver: false, 
+        carPlate: ""
     }
     const stubSave = sinon.stub(AccountDAO.prototype, "save").resolves();
     const stubGetByEmail = sinon.stub(AccountDAO.prototype, "getByEmail").resolves();
-    const signup = new Signup();
     const output = await signup.execute(input);
-    input.account_id = output.accountId;
     const stubGetById = sinon.stub(AccountDAO.prototype, "getById").resolves(Account.create(input.name, input.email, input.cpf, input.isPassenger, false, ""));
-    const getAccount = new GetAccount();
     const account = await getAccount.execute(output.accountId);
     expect(account?.accountId).toBeDefined();
     expect(account?.name).toBe(input.name);
@@ -130,11 +146,9 @@ test("Deve criar um passageiro com spy", async function () {
     }
     const spySave = sinon.stub(AccountDAO.prototype, "save").resolves();
     const spyGetByEmail = sinon.stub(AccountDAO.prototype, "getByEmail").resolves();
-    const signup = new Signup();
     const output = await signup.execute(input);
     input.account_id = output.accountId;
     const spyGetById = sinon.stub(AccountDAO.prototype, "getById").resolves(input);
-    const getAccount = new GetAccount();
     const account = await getAccount.execute(output.accountId);
     expect(spySend.calledOnce).toBeTruthy();
     expect(spySend.calledWith(input.email)).toBeTruthy();
@@ -156,11 +170,9 @@ test("Deve criar um passageiro com mock", async function () {
     const mockAccountDAO = sinon.mock(AccountDAO.prototype);
     mockAccountDAO.expects("save").resolves();
     mockAccountDAO.expects("getByEmail").resolves();
-    const signup = new Signup();
     const output = await signup.execute(input);
     input.account_id = output.accountId;
     mockAccountDAO.expects("getByEmail").resolves(input);
-    const getAccount = new GetAccount();
     const account = await getAccount.execute(output.accountId);
     mock.verify();
     mock.restore();
@@ -168,11 +180,13 @@ test("Deve criar um passageiro com mock", async function () {
 
 test("Deve criar um passageiro com fake", async function () {
     const accountDAO = new AccountDAOMemory();
-    const input: any = {
+    const input = {
         name: "John Doe",
         email: `john.doe${Math.random()}@gmail.com`,
         cpf: "04765351076",
-        isPassenger: true
+        isPassenger: true,
+        isDriver: false,
+        carPlate: ""
     }
     const signup = new Signup(accountDAO);
     const output = await signup.execute(input);
@@ -195,4 +209,8 @@ test("Não deve criar um passageiro com conta existente usando fake", async func
     const signup = new Signup(accountDAO);
     await signup.execute(input);
     await expect(() => signup.execute(input)).rejects.toThrow(new Error("Account already exists"));
+})
+
+afterEach(async function () {
+    await connection.close();
 })

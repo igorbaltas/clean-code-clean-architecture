@@ -1,9 +1,18 @@
-import  crypto from 'crypto';
 import AccountDAO from "../src/AccountDAO";
 import Account from '../src/Account';
+import IConnection from "../src/IConnection";
+import PgPromiseAdapter from "../src/PgPromiseAdapter";
+import IAccountDAO from "../src/IAccountDAO";
+
+let accountDAO: IAccountDAO;
+let connection: IConnection;
+
+beforeEach(function() {
+    connection = new PgPromiseAdapter();
+    accountDAO = new AccountDAO(connection);
+});
 
 test("Deve criar um registro na tabela account e consultar por email", async function () {
-    const accountDAO = new AccountDAO();
     const input = Account.create("John Doe", `john.doe${Math.random()}@gmail.com`, "04765351076", true, false, "")
     await accountDAO.save(input);
     const savedAccount = await accountDAO.getByEmail(input.email);
@@ -17,7 +26,6 @@ test("Deve criar um registro na tabela account e consultar por email", async fun
 })
 
 test("Deve criar um registro na tabela account e consultar por account_id", async function () {
-    const accountDAO = new AccountDAO();
     const input = Account.create("John Doe", `john.doe${Math.random()}@gmail.com`, "04765351076", true, false, "")
     await accountDAO.save(input);
     const savedAccount = await accountDAO.getById(input.accountId);
@@ -28,4 +36,8 @@ test("Deve criar um registro na tabela account e consultar por account_id", asyn
     expect(savedAccount?.isPassenger).toBeTruthy();
     expect(savedAccount?.date).toBeDefined();
     expect(savedAccount?.verificationCode).toBe(input.verificationCode);
+})
+
+afterEach(async function () {
+    await connection.close();
 })

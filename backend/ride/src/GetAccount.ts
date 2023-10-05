@@ -3,7 +3,7 @@ import IAccountDAO from "./IAccountDAO";
 
 export default class GetAccount {
 
-	constructor (readonly accountDAO: IAccountDAO = new AccountDAO()) {
+	constructor (readonly accountDAO: IAccountDAO) {
 	}
 
 	async execute(accountId: string) {
